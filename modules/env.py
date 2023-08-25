@@ -10,7 +10,9 @@ keys = [
     "BASE_URL",
     "AUTH_URL",
     "TOKEN_URL",
-    "TOKEN_SCOPE"
+    "TOKEN_SCOPE",
+    "FLASK_PORT",
 ]
+    # "FASTAPI_PORT",
 
 environ = {key: value for key, value in dict(os.environ).items() if key in keys}

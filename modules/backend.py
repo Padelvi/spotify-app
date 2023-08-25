@@ -72,7 +72,7 @@ def get_refresh_token_params():
     }
 
 def refresh_token():
-    if get_refresh_token() != None:
+    if get_refresh_token() is not None:
         refresh_token = get_refresh_token()
         encoded_credentials = get_encrypted_credentials()
         headers = get_auth_headers(encoded_credentials)

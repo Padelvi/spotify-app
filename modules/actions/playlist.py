@@ -1,21 +1,34 @@
 import requests
 from ..env import environ
 from ..backend import get_token_headers
+from ..utils import extract_sp_link, add_content_type_to_headers, verify_request
+from .clear import clear_playlist
+from .collect import collect_playlist
+from .add import add_items
 
-playlist = "0ksHbUW5uB9qJepdHDnBPN"
-url = "{}/playlists/{}".format(environ["BASE_URL"], playlist)
+headers = add_content_type_to_headers(get_token_headers())
 
-# r = requests.put(url, headers=get_token_headers(), data={
-#     "name": "Just experimenting",
-#     "public": False
-# })
+index, verify = extract_sp_link(
+    "https://open.spotify.com/playlist/783nz67tWQm7qBKHSgzWgK",
+    "playlist"
+)
 
-r = requests.get(url, headers=get_token_headers())
+assert verify
 
-if r.status_code == 200:
-    print(r.json())
-    print(f"Status code: {r.status_code}")
-else:
-    print(f"Status code: {r.status_code}")
-    print(r.json())
+url = "{}/playlists/{}/tracks".format(environ["BASE_URL"], index)
 
+total_req = requests.get(url, headers=headers, params={
+    "fields": "total",
+})
+
+total = total_req.json()["total"]
+
+verify_request(total_req, "First request", 200)
+
+tracks = collect_playlist(index)
+
+clear_playlist(index, tracks)
+
+input("Pause before POST")
+
+add_items(index, tracks)
