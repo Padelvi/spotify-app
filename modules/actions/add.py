@@ -1,19 +1,25 @@
 import requests
 import random
-from ..env import environ
 from ..backend import get_token_headers
-from ..utils import add_content_type_to_headers, verify_request
+from ..utils import verify_request, group_tracks
 
 headers = get_token_headers()
 
-def add_items(index: str, tracks: list):
-    url = "{}/playlists/{}/tracks".format(environ["BASE_URL"], index)
+def add_items_randomly(url: str, tracks: list):
+    to_shuffle = []
 
-    uris = list(map(lambda obj: obj["uri"], tracks))
-    random.shuffle(uris)
+    for segment in tracks:
+        for item in segment:
+            to_shuffle.append(item)
 
-    post_req = requests.post(url, headers=headers, json = {
-        "uris": uris
-    })
+    random.shuffle(to_shuffle)
 
-    verify_request(post_req, "Post request", 201)
+    total_uris = list(map(lambda obj: obj["uri"], to_shuffle))
+    grouped_uris = group_tracks(total_uris)
+
+    for uris in grouped_uris:
+        post_req = requests.post(url, headers=headers, json = {
+            "uris": uris
+        })
+
+        verify_request(post_req, "Post request", 201)

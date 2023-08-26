@@ -1,16 +1,14 @@
 import requests
-from ..env import environ
 from ..backend import get_token_headers
-from ..utils import add_content_type_to_headers, verify_request
+from ..utils import verify_request
 
-headers = add_content_type_to_headers(get_token_headers())
+headers = get_token_headers()
 
-def collect_playlist(index: str):
-    url = "{}/playlists/{}/tracks".format(environ["BASE_URL"], index)
-
+def collect_playlist(url: str, offset: int):
     get_req = requests.get(url, headers=headers, params={
         "fields": "items",
-        "limit": 50
+        "limit": 50,
+        "offset": offset,
     })
 
     get_json = get_req.json()

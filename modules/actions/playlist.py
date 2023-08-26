@@ -1,15 +1,17 @@
 import requests
 from ..env import environ
 from ..backend import get_token_headers
-from ..utils import extract_sp_link, add_content_type_to_headers, verify_request
-from .clear import clear_playlist
+from ..utils import extract_sp_link, verify_request, group_tracks
+from .clear import clear_tracks
 from .collect import collect_playlist
-from .add import add_items
+from .add import add_items_randomly
 
-headers = add_content_type_to_headers(get_token_headers())
+headers = get_token_headers()
+
+link = input("Playlist link: ")
 
 index, verify = extract_sp_link(
-    "https://open.spotify.com/playlist/783nz67tWQm7qBKHSgzWgK",
+    link,
     "playlist"
 )
 
@@ -25,10 +27,20 @@ total = total_req.json()["total"]
 
 verify_request(total_req, "First request", 200)
 
-tracks = collect_playlist(index)
+repeat = total // 50 + 1
+offset_l = []
+tracks = []
 
-clear_playlist(index, tracks)
+for iter in tuple(range(repeat)):
+    offset_l.append(iter * 50)
 
-input("Pause before POST")
+for offset in offset_l:
+    tracks_now = collect_playlist(url, offset)
+    for track in tracks_now:
+        tracks.append(track)
 
-add_items(index, tracks)
+grouped_tracks = group_tracks(tracks)
+
+clear_tracks(url, grouped_tracks)
+
+add_items_randomly(url, grouped_tracks)
