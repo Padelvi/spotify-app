@@ -1,8 +1,7 @@
 import requests
-from ..env import environ
-from ..backend import get_token_headers
-from ..utils import extract_sp_link, verify_request, group_tracks
-from .clear import clear_tracks
+from .env import environ
+from .backend import get_token_headers
+from .utils import extract_sp_link, verify_request, group_tracks
 from .collect import collect_playlist
 from .add import add_items_randomly
 
@@ -18,6 +17,13 @@ index, verify = extract_sp_link(
 assert verify
 
 url = "{}/playlists/{}/tracks".format(environ["BASE_URL"], index)
+
+def clear_tracks(url: str, total_tracks: list):
+    for tracks in total_tracks:
+        delete_req = requests.delete(url, headers=headers, json={
+            "tracks": tracks
+        })
+        verify_request(delete_req, "Delete request", 200)
 
 total_req = requests.get(url, headers=headers, params={
     "fields": "total",

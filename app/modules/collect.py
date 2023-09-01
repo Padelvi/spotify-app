@@ -1,6 +1,6 @@
 import requests
-from ..backend import get_token_headers
-from ..utils import verify_request
+from .backend import get_token_headers
+from .utils import verify_request
 
 headers = get_token_headers()
 

@@ -1,7 +1,7 @@
 import requests
 import random
-from ..backend import get_token_headers
-from ..utils import verify_request, group_tracks
+from .backend import get_token_headers
+from .utils import verify_request, group_tracks
 
 headers = get_token_headers()
 

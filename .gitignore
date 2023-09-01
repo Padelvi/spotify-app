@@ -9,6 +9,3 @@ modules/actions/__pycache__/
 
 # Token file
 config.json
-
-# Pytest
-.pytest_cache

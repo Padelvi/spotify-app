@@ -1,4 +1,3 @@
-# from typing import List
 from requests import Response
 
 def extract_sp_link(link:str, verify_type: str):
@@ -14,7 +13,7 @@ def verify_request(req: Response, desc, default_code: int):
     else:
         msg = f"Error: code {req.status_code}"
         print(req.json())
-    print(msg)
+    print(msg + "\n")
     return msg
 
 def group_tracks(tracks):
