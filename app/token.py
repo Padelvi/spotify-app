@@ -5,7 +5,10 @@ file_name = 'config.json'
 def get_token():
     with open(file_name) as config_file:
         config = json.load(config_file)
-    return config['token']
+    try:
+        return config["token"]
+    except KeyError:
+        return None
 
 def get_refresh_token():
     with open(file_name) as config_file:

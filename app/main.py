@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
 from fastapi.exceptions import HTTPException
-from .modules.env import environ
-from .modules.backend import (
+from fastapi.responses import RedirectResponse
+from .env import environ
+from . import schemas
+from .utils import (
     get_auth_params,
     initialize_state,
     request_token,
@@ -12,8 +13,12 @@ from .modules.backend import (
 
 app = FastAPI()
 
+@app.get("/")
+def root():
+    return RedirectResponse("http://localhost:8000/docs")
+
 @app.get("/callback")
-def callback(code: int, state):
+def callback(code, state):
     if invalid_state(state):
         raise HTTPException(status_code=403)
     request_token(code)
@@ -21,16 +26,12 @@ def callback(code: int, state):
         "msg": "Got to callback url"
     }
 
-@app.get("/authorize")
-def authorize():
-    if refresh_token():
+@app.post("/authorize")
+def authorize(form: schemas.AuthForm):
+    if refresh_token() and not form.recharge_scope:
         return {
-            "msg": "Got to callback from authorize"
+            "msg": "Token refreshed"
         }
     else:
         initialize_state()
-        params = get_auth_params()
-        return RedirectResponse(url=environ["AUTH_URL"] +
-            '?' +
-            '&'.join([f'{k}={v}' for k, v in params.items()])
-        )
+        return get_auth_params(form.scope)
