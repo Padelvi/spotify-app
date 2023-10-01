@@ -1,6 +1,8 @@
 from pydantic import BaseModel
-from typing import List
+from typing import Literal
 
-class AuthForm(BaseModel):
-    scope: List[str]
-    recharge_scope: bool
+class JustID(BaseModel):
+    id: str
+
+class SetRepeat(BaseModel):
+    repeat: Literal["track", "context", "off"]

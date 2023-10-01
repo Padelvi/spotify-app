@@ -1,6 +1,5 @@
 import requests
 import random
-from ..env import environ
 from ..utils import (
     extract_sp_link,
     make_request,
@@ -19,16 +18,16 @@ def group_tracks(tracks):
         final.append(segment)
     return final
 
-def collect_playlist(url: str, offset: int):
+def collect_playlist(endpoint: str, offset: int):
     get_req = make_request(
         requests.get,
-        url,
+        endpoint,
         "Get request",
         scope,
         params={
-        "fields": "items",
-        "limit": 50,
-        "offset": offset,
+            "fields": "items",
+            "limit": 50,
+            "offset": offset,
     })
 
     get_json = get_req.json()
@@ -38,18 +37,18 @@ def collect_playlist(url: str, offset: int):
         get_json["items"]
     ))
 
-def clear_tracks(url: str, total_tracks: list):
+def clear_tracks(endpoint: str, total_tracks: list):
     for tracks in total_tracks:
         delete_req = make_request(
             requests.delete,
-            url,
+            endpoint,
             "Delete request",
             scope,
             json={
-            "tracks": tracks
+                "tracks": tracks
         })
 
-def add_items_randomly(url: str, tracks: list):
+def add_items_randomly(endpoint: str, tracks: list):
     to_shuffle = []
 
     for segment in tracks:
@@ -64,30 +63,23 @@ def add_items_randomly(url: str, tracks: list):
     for uris in grouped_uris:
         post_req = make_request(
             requests.post,
-            url,
+            endpoint,
             "Post request",
             scope,
             json={
-            "uris": uris
+                "uris": uris
         })
 
-def shuffle_playlist(link:str):
-    index, verify = extract_sp_link(
-        link,
-        "playlist"
-    )
-
-    assert verify
-
-    url = "{}/playlists/{}/tracks".format(environ["BASE_URL"], index)
+def shuffle_playlist(index:str):
+    endpoint = "/playlists/{}/tracks".format(index)
 
     total_req = make_request(
         requests.get,
-        url,
+        endpoint,
         "First request",
         scope,
         params={
-        "fields": "total",
+            "fields": "total",
     })
 
     total = total_req.json()["total"]
@@ -96,16 +88,19 @@ def shuffle_playlist(link:str):
     tracks = []
 
     for offset in offset_l:
-        tracks_now = collect_playlist(url, offset)
+        tracks_now = collect_playlist(endpoint, offset)
         for track in tracks_now:
             tracks.append(track)
 
     grouped_tracks = group_tracks(tracks)
 
-    clear_tracks(url, grouped_tracks)
+    clear_tracks(endpoint, grouped_tracks)
 
-    add_items_randomly(url, grouped_tracks)
+    add_items_randomly(endpoint, grouped_tracks)
 
 if __name__ == "__main__":
-    link = input("Playlist link: ")
-    shuffle_playlist(link)
+    index = extract_sp_link(
+        input("Playlist link: "),
+        "playlist"
+    )
+    shuffle_playlist(index)
